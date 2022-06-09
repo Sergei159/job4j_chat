@@ -1,7 +1,7 @@
 package ru.job4j.chat.repository;
 
 import org.springframework.stereotype.Component;
-import ru.job4j.chat.model.Person;
+import ru.job4j.chat.domain.Person;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ public class UserRepository {
     private final ConcurrentHashMap<String, Person> users = new ConcurrentHashMap<>();
 
     public void save(Person user) {
-        users.put(user.getUsername(), user);
+        users.put(user.getName(), user);
     }
 
 

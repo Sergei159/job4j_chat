@@ -3,7 +3,7 @@ package ru.job4j.chat.controller;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import ru.job4j.chat.model.Person;
+import ru.job4j.chat.domain.Person;
 import ru.job4j.chat.repository.UserRepository;
 
 import java.util.List;
