@@ -11,45 +11,20 @@ public class Person {
     private int id;
 
     private String name;
+    private String email;
+    private String password;
 
-    @Column(name = "role_id")
-    private int roleId;
-
-    @Transient
+    @ManyToOne
+    @JoinColumn(name = "role_id")
     private Role role;
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-
-
-    public int getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(int roleId) {
-        this.roleId = roleId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public static Person of(String name, String email, String password, Role role) {
+        Person person = new Person();
+        person.name = name;
+        person.email = email;
+        person.password = password;
+        person.role = role;
+        return person;
     }
 
     @Override
@@ -61,11 +36,14 @@ public class Person {
             return false;
         }
         Person person = (Person) o;
-        return id == person.id && roleId == person.roleId && Objects.equals(name, person.name) && Objects.equals(role, person.role);
+        return id == person.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, roleId, role);
+        return Objects.hash(id);
     }
+
+
 }
+

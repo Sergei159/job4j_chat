@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.job4j.chat.domain.Person;
 import ru.job4j.chat.repository.PersonRepository;
 import ru.job4j.chat.repository.RoleRepository;
+import ru.job4j.chat.service.PersonService;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,12 +15,10 @@ import java.util.Optional;
 @RequestMapping("/person")
 public class PersonController {
 
-    private final PersonRepository personRepository;
-    private final RoleRepository roleRepository;
+    private final PersonService personService;
 
-    public PersonController(PersonRepository personRepository, RoleRepository roleRepository) {
-        this.personRepository = personRepository;
-        this.roleRepository = roleRepository;
+    public PersonController(PersonService personService) {
+        this.personService = personService;
     }
 
     /**
@@ -27,12 +26,8 @@ public class PersonController {
      */
 
     @GetMapping("/")
-    public List<Person> findAll() {
-        List<Person> persons = (List<Person>) personRepository.findAll();
-        for (Person person : persons) {
-            person.setRole(roleRepository.findById(person.getRoleId()).get());
-        }
-        return persons;
+    public List<Person> getAllPersons() {
+        return (List<Person>) personService.findAll();
     }
 
     /**
@@ -41,15 +36,11 @@ public class PersonController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Person> findById(@PathVariable int id) {
-        Optional<Person> person = personRepository.findById(id);
-        ResponseEntity responseEntity = new ResponseEntity<>(
+        Optional<Person> person = personService.findById(id);
+        return new ResponseEntity<>(
                 person.orElse(new Person()),
                 person.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
         );
-        person.get().setRole(roleRepository.findById(
-                person.get().getRoleId()).get()
-        );
-        return responseEntity;
     }
 
     /**
@@ -57,11 +48,9 @@ public class PersonController {
      */
 
     @PostMapping("/")
-    public ResponseEntity<Person> createPerson(@RequestBody Person person) {
-        person.setRole(roleRepository.findById(person.getRoleId()).get());
-        personRepository.save(person);
+    public ResponseEntity<Person> savePerson(@RequestBody Person person) {
         return new ResponseEntity<Person>(
-                person,
+                personService.save(person),
                 HttpStatus.CREATED
         );
     }
@@ -72,7 +61,7 @@ public class PersonController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
-        personRepository.save(person);
+        personService.save(person);
         return ResponseEntity.ok().build();
     }
 
@@ -82,8 +71,7 @@ public class PersonController {
 
     @DeleteMapping("/")
     public ResponseEntity<Void> delete(@PathVariable int id) {
-        Person person = personRepository.findById(id).get();
-        personRepository.delete(person);
+        personService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 

@@ -1,8 +1,6 @@
 package ru.job4j.chat.domain;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -15,22 +13,10 @@ public class Room {
 
     private String name;
 
-    @Transient
-    private List<Person> persons = new ArrayList<>();
-
-    @Transient
-    private List<Message> messages = new ArrayList<>();
-
-    public void addPerson(Person person) {
-        persons.add(person);
-    }
-
-    public void addMessage(Message message) {
-        messages.add(message);
-    }
-
-    public void deletePerson(Person person) {
-        persons.remove(person);
+    public static Room of(String name) {
+        Room room = new Room();
+        room.name = name;
+        return room;
     }
 
     public int getId() {
@@ -49,22 +35,6 @@ public class Room {
         this.name = name;
     }
 
-    public List<Person> getPersons() {
-        return persons;
-    }
-
-    public void setPersons(List<Person> persons) {
-        this.persons = persons;
-    }
-
-    public List<Message> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -74,11 +44,13 @@ public class Room {
             return false;
         }
         Room room = (Room) o;
-        return id == room.id && Objects.equals(name, room.name) && Objects.equals(persons, room.persons) && Objects.equals(messages, room.messages);
+        return id == room.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, persons, messages);
+        return Objects.hash(id);
     }
 }
+
+

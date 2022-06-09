@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.chat.domain.Person;
 import ru.job4j.chat.domain.Room;
-import ru.job4j.chat.repository.RoomRepository;
+import ru.job4j.chat.service.RoomService;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +14,11 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/room")
 public class RoomController {
-    private final RoomRepository roomRepository;
 
-    public RoomController(RoomRepository rooms) {
-        this.roomRepository = rooms;
+    private final RoomService roomService;
+
+    public RoomController(RoomService roomService) {
+        this.roomService = roomService;
     }
 
     /**
@@ -26,46 +27,38 @@ public class RoomController {
 
     @GetMapping("/")
     public List<Room> findAll() {
-        List<Room> rooms = (List<Room>) roomRepository.findAll();
-        return rooms;
+        return (List<Room>) roomService.findAll();
     }
 
     /**
-     * Получить всех пользователей в комнате
+     * Получить комнату по id
      */
 
     @GetMapping("/{id}")
-    public List<Person> findAllPersons(@PathVariable int id) {
-        Room room = roomRepository.findById(id).get();
-        return room.getPersons();
+    public ResponseEntity<Room> findRoomById(@PathVariable int id) {
+        var room = roomService.findRoomById(id);
+        return new ResponseEntity<>(
+                room.orElse(new Room()),
+                room.isPresent() ?  HttpStatus.OK : HttpStatus.NOT_FOUND
+        );
     }
 
     /**
-     * Добавить пользователя в комнату
+     * обновить комнату
      *
      */
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> addPerson(@PathVariable int id, @RequestBody Person person) {
-        Optional<Room> room = roomRepository.findById(id);
-        if (room.isPresent()) {
-            room.get().addPerson(person);
-            return ResponseEntity.ok().build();
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @PutMapping("/")
+    public ResponseEntity<Void> update(@RequestBody Room room) {
+        roomService.save(room);
+        return ResponseEntity.ok().build();
     }
 
     /**
-     * Удалить пользователя из комнаты
+     * Удалить комнату
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePerson(@PathVariable int id, @RequestBody Person person) {
-        Optional<Room> room = roomRepository.findById(id);
-        if (room.isPresent()) {
-            room.get().deletePerson(person);
-            return ResponseEntity.ok().build();
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Void> delete(@PathVariable int id) {
+        this.roomService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }
