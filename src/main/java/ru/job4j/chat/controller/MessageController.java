@@ -1,16 +1,21 @@
 package ru.job4j.chat.controller;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.Message;
+import ru.job4j.chat.handlers.Operation;
 import ru.job4j.chat.service.MessageService;
 import ru.job4j.chat.service.RoomService;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/message")
@@ -36,7 +41,7 @@ public class MessageController {
      */
 
     @GetMapping("/{id}")
-    public ResponseEntity<Message> findMessageById(@PathVariable int id) {
+    public ResponseEntity<Message> findMessageById(@Valid @PathVariable int id) {
         Optional<Message> message = messageService.findById(id);
         return new ResponseEntity<>(
                 message.orElse(new Message()),
@@ -49,7 +54,7 @@ public class MessageController {
      */
 
     @GetMapping("/person/{id}")
-    public List<Message> findMessagesByPersonId(@PathVariable int id) {
+    public List<Message> findMessagesByPersonId(@Valid @PathVariable int id) {
         List<Message> messages = (List<Message>) messageService.findByPersonId(id);
         if (messages.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Messages were not found");
@@ -62,7 +67,7 @@ public class MessageController {
      */
 
     @GetMapping("/room/{id}")
-    public List<Message> findMessagesByRoomId(@PathVariable int id) {
+    public List<Message> findMessagesByRoomId(@Valid @PathVariable int id) {
         List<Message> messages = (List<Message>) messageService.findByRoomId(id);
         if (messages.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Messages were not found");
@@ -88,7 +93,8 @@ public class MessageController {
      * Опубликовать сообщение в комнате
      */
     @PostMapping("/room/{id}")
-    public ResponseEntity save(@PathVariable int id, @RequestBody Message message) {
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity save(@Valid @PathVariable int id, @Valid @RequestBody Message message) {
         var room = roomService.findRoomById(id);
         if (room.isPresent()) {
             message.setRoom(room.get());
@@ -103,7 +109,8 @@ public class MessageController {
      * Обновить сообщение
      */
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Message message) {
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Message message) {
         if (message.getDescription() == null) {
             throw new NullPointerException("Message cannot be empty");
         }
@@ -115,13 +122,14 @@ public class MessageController {
      * Удалить сообщение
      */
     @DeleteMapping("/{id}")
+    @Validated(Operation.OnDelete.class)
     public ResponseEntity<Void> delete(@PathVariable int id) {
         this.messageService.deleteMessage(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/patch/{id}")
-    public Message patch(@PathVariable int id, @RequestBody Message message) throws InvocationTargetException, IllegalAccessException {
+    public Message patch(@Valid @PathVariable int id, @Valid @RequestBody Message message) throws InvocationTargetException, IllegalAccessException {
         return messageService.patch(id, message);
     }
 }

@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.chat.domain.Person;
+import ru.job4j.chat.handlers.Operation;
 import ru.job4j.chat.service.PersonService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -44,7 +47,7 @@ public class PersonController {
      */
 
     @GetMapping("/{id}")
-    public ResponseEntity<Person> findById(@PathVariable int id) {
+    public ResponseEntity<Person> findById(@Valid@PathVariable int id) {
         Optional<Person> person = personService.findById(id);
         return new ResponseEntity<>(
                 person.orElse(new Person()),
@@ -57,7 +60,8 @@ public class PersonController {
      */
 
     @PostMapping("/sign-up")
-    public ResponseEntity<Person> savePerson(@RequestBody Person person) {
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Person> savePerson(@Valid@RequestBody Person person) {
         if (person.getName().equalsIgnoreCase("admin")) {
             throw new IllegalArgumentException("Username can not be 'admin'");
         }
@@ -76,7 +80,8 @@ public class PersonController {
      */
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Person person) {
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Person person) {
         if (person.getName() == null) {
             throw new NullPointerException("Name cannot be empty");
         }
@@ -92,13 +97,14 @@ public class PersonController {
      */
 
     @DeleteMapping("/")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    @Validated(Operation.OnDelete.class)
+    public ResponseEntity<Void> delete(@Valid @PathVariable int id) {
         personService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/person/patch/{id}")
-    public Person patch(@PathVariable int id, @RequestBody Person person) throws InvocationTargetException, IllegalAccessException {
+    public Person patch(@Valid @PathVariable int id, @Valid  @RequestBody Person person) throws InvocationTargetException, IllegalAccessException {
         return personService.patch(id, person);
     }
 

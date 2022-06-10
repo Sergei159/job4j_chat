@@ -1,6 +1,11 @@
 package ru.job4j.chat.domain;
 
+import ru.job4j.chat.handlers.Operation;
+
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Entity
@@ -8,8 +13,11 @@ import java.util.Objects;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull(message = "Id must not be null",
+            groups = {Operation.OnUpdate.class, Operation.OnDelete.class})
     private int id;
 
+    @Size(min = 2, message = "Name must have at least 2 symbols")
     private String name;
 
     public static Role of(String name) {

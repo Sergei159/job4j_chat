@@ -2,15 +2,17 @@ package ru.job4j.chat.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import ru.job4j.chat.domain.Person;
+import ru.job4j.chat.domain.Role;
 import ru.job4j.chat.domain.Room;
+import ru.job4j.chat.handlers.Operation;
 import ru.job4j.chat.service.RoomService;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Optional;
 
 
 @RestController
@@ -41,7 +43,7 @@ public class RoomController {
      */
 
     @GetMapping("/{id}")
-    public ResponseEntity<Room> findRoomById(@PathVariable int id) {
+    public ResponseEntity<Room> findRoomById(@Valid @PathVariable int id) {
         var room = roomService.findRoomById(id);
         return new ResponseEntity<>(
                 room.orElse(new Room()),
@@ -50,11 +52,26 @@ public class RoomController {
     }
 
     /**
+     * создать комнату
+     *
+     */
+
+    @PostMapping("/")
+    @Validated(Operation.OnCreate.class)
+    public ResponseEntity<Room> save(@Valid @RequestBody Room room) {
+        return new ResponseEntity<Room>(
+                roomService.save(room),
+                HttpStatus.CREATED
+        );
+    }
+
+    /**
      * обновить комнату
      *
      */
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Room room) {
+    @Validated(Operation.OnUpdate.class)
+    public ResponseEntity<Void> update(@Valid @RequestBody Room room) {
         if (room.getName() == null) {
             throw new NullPointerException("Room name cannot be empty");
         }
@@ -66,13 +83,14 @@ public class RoomController {
      * Удалить комнату
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    @Validated(Operation.OnDelete.class)
+    public ResponseEntity<Void> delete(@Valid @PathVariable int id) {
         this.roomService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/patch/{id}")
-    public Room patch(@PathVariable int id, @RequestBody Room room) throws InvocationTargetException, IllegalAccessException {
+    public Room patch(@Valid @PathVariable int id, @Valid @RequestBody Room room) throws InvocationTargetException, IllegalAccessException {
         return roomService.patch(id, room);
     }
 }
