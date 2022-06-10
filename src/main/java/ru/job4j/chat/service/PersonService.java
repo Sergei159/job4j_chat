@@ -2,13 +2,15 @@ package ru.job4j.chat.service;
 
 import org.springframework.stereotype.Service;
 import ru.job4j.chat.domain.Person;
+import ru.job4j.chat.domain.Role;
 import ru.job4j.chat.repository.PersonRepository;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class PersonService {
+public class PersonService implements Store {
 
     private final PersonRepository repository;
 
@@ -30,5 +32,9 @@ public class PersonService {
 
     public Optional<Person> findById(int id) {
         return repository.findById(id);
+    }
+
+    public Person patch(int id, Person person) throws InvocationTargetException, IllegalAccessException {
+        return (Person) patch(repository, id, person);
     }
 }

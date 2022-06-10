@@ -8,6 +8,7 @@ import ru.job4j.chat.domain.Message;
 import ru.job4j.chat.service.MessageService;
 import ru.job4j.chat.service.RoomService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,5 +118,10 @@ public class MessageController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         this.messageService.deleteMessage(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/patch/{id}")
+    public Message patch(@PathVariable int id, @RequestBody Message message) throws InvocationTargetException, IllegalAccessException {
+        return messageService.patch(id, message);
     }
 }

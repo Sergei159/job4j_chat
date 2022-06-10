@@ -11,6 +11,7 @@ import ru.job4j.chat.service.PersonService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -94,6 +95,11 @@ public class PersonController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         personService.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/person/patch/{id}")
+    public Person patch(@PathVariable int id, @RequestBody Person person) throws InvocationTargetException, IllegalAccessException {
+        return personService.patch(id, person);
     }
 
     @ExceptionHandler(value = { IllegalArgumentException.class })

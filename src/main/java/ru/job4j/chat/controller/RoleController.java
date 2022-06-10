@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.Role;
 import ru.job4j.chat.service.RoleService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,5 +60,10 @@ public class RoleController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         this.roleService.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/patch/{id}")
+    public Role patch(@PathVariable int id, @RequestBody Role role) throws InvocationTargetException, IllegalAccessException {
+        return roleService.patch(id, role);
     }
 }

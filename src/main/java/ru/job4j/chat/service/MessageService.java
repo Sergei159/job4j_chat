@@ -2,13 +2,15 @@ package ru.job4j.chat.service;
 
 import org.springframework.stereotype.Service;
 import ru.job4j.chat.domain.Message;
+import ru.job4j.chat.domain.Role;
 import ru.job4j.chat.repository.MessageRepository;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class MessageService {
+public class MessageService implements Store {
 
     private final MessageRepository repository;
 
@@ -42,5 +44,9 @@ public class MessageService {
 
     public void deleteMessage(int id) {
         repository.deleteById(id);
+    }
+
+    public Message patch(int id, Message message) throws InvocationTargetException, IllegalAccessException {
+        return (Message) patch(repository, id, message);
     }
 }

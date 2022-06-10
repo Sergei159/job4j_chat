@@ -8,6 +8,7 @@ import ru.job4j.chat.domain.Person;
 import ru.job4j.chat.domain.Room;
 import ru.job4j.chat.service.RoomService;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,4 +70,10 @@ public class RoomController {
         this.roomService.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/patch/{id}")
+    public Room patch(@PathVariable int id, @RequestBody Room room) throws InvocationTargetException, IllegalAccessException {
+        return roomService.patch(id, room);
+    }
 }
+

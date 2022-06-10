@@ -4,11 +4,12 @@ import org.springframework.stereotype.Service;
 import ru.job4j.chat.domain.Room;
 import ru.job4j.chat.repository.RoomRepository;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class RoomService {
+public class RoomService implements Store {
 
     private final RoomRepository repository;
 
@@ -30,5 +31,9 @@ public class RoomService {
 
     public void deleteById(int id) {
         repository.deleteById(id);
+    }
+
+    public Room patch(int id, Room room) throws InvocationTargetException, IllegalAccessException {
+        return (Room) patch(repository, id, room);
     }
 }
