@@ -3,6 +3,7 @@ package ru.job4j.chat.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.Role;
 import ru.job4j.chat.service.RoleService;
 
@@ -21,7 +22,11 @@ public class RoleController {
 
     @GetMapping("/")
     public List<Role> getAllRoles() {
-        return (List<Role>) roleService.findAll();
+        List<Role> roles =  (List<Role>) roleService.findAll();
+        if (roles.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Roles were not found");
+        }
+        return roles;
     }
 
     @GetMapping("/{id}")
@@ -43,6 +48,9 @@ public class RoleController {
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Role role) {
+        if (role.getName() == null) {
+            throw new NullPointerException("Role name cannot be empty");
+        }
         this.roleService.save(role);
         return ResponseEntity.ok().build();
     }
