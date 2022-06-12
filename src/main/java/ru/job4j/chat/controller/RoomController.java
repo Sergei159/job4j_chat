@@ -13,6 +13,7 @@ import ru.job4j.chat.service.RoomService;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -59,9 +60,10 @@ public class RoomController {
     @PostMapping("/")
     @Validated(Operation.OnCreate.class)
     public ResponseEntity<Room> save(@Valid @RequestBody Room room) {
-        return new ResponseEntity<Room>(
-                roomService.save(room),
-                HttpStatus.CREATED
+        Optional<Room> result = Optional.ofNullable(roomService.save(room));
+        return new ResponseEntity<>(
+                result.orElse(new Room()),
+                result.isPresent() ? HttpStatus.CREATED : HttpStatus.NOT_FOUND
         );
     }
 
@@ -72,11 +74,16 @@ public class RoomController {
     @PutMapping("/")
     @Validated(Operation.OnUpdate.class)
     public ResponseEntity<Void> update(@Valid @RequestBody Room room) {
-        if (room.getName() == null) {
-            throw new NullPointerException("Room name cannot be empty");
+        Optional<Room> result = Optional.ofNullable(room);
+        if (result.isPresent()) {
+            if (room.getName() == null) {
+                throw new NullPointerException("Room name cannot be empty");
+            }
+            roomService.save(room);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        roomService.save(room);
-        return ResponseEntity.ok().build();
     }
 
     /**

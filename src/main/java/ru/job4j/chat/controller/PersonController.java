@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.chat.domain.Person;
+import ru.job4j.chat.domain.Role;
 import ru.job4j.chat.handlers.Operation;
 import ru.job4j.chat.service.PersonService;
 
@@ -47,7 +48,7 @@ public class PersonController {
      */
 
     @GetMapping("/{id}")
-    public ResponseEntity<Person> findById(@Valid@PathVariable int id) {
+    public ResponseEntity<Person> findById(@Valid @PathVariable int id) {
         Optional<Person> person = personService.findById(id);
         return new ResponseEntity<>(
                 person.orElse(new Person()),
@@ -61,18 +62,27 @@ public class PersonController {
 
     @PostMapping("/sign-up")
     @Validated(Operation.OnCreate.class)
-    public ResponseEntity<Person> savePerson(@Valid@RequestBody Person person) {
-        if (person.getName().equalsIgnoreCase("admin")) {
-            throw new IllegalArgumentException("Username can not be 'admin'");
+    public ResponseEntity<Person> savePerson(@Valid @RequestBody Person person) {
+        Optional<Person> result = Optional.ofNullable(person);
+        if (result.isPresent()) {
+            if (person.getName().equalsIgnoreCase("admin")) {
+                throw new IllegalArgumentException("Username can not be 'admin'");
+            }
+            if (person.getName().equalsIgnoreCase("user")) {
+                throw new IllegalArgumentException("Username can not be 'user'");
+            }
+            person.setPassword(encoder.encode(person.getPassword()));
+            personService.save(person);
+            return new ResponseEntity<>(
+                    result.get(),
+                    HttpStatus.CREATED
+            );
+        } else {
+            return new ResponseEntity<>(
+                    new Person(),
+                    HttpStatus.NOT_FOUND
+            );
         }
-        if (person.getName().equalsIgnoreCase("user")) {
-            throw new IllegalArgumentException("Username can not be 'user'");
-        }
-        person.setPassword(encoder.encode(person.getPassword()));
-        return new ResponseEntity<>(
-                personService.save(person),
-                HttpStatus.CREATED
-        );
     }
 
     /**
@@ -82,14 +92,19 @@ public class PersonController {
     @PutMapping("/")
     @Validated(Operation.OnUpdate.class)
     public ResponseEntity<Void> update(@Valid @RequestBody Person person) {
-        if (person.getName() == null) {
-            throw new NullPointerException("Name cannot be empty");
+        Optional<Person> result = Optional.ofNullable(person);
+        if (result.isPresent()) {
+            if (person.getName() == null) {
+                throw new NullPointerException("Name cannot be empty");
+            }
+            if (person.getEmail() == null) {
+                throw new NullPointerException("Email cannot be empty");
+            }
+            personService.save(person);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        if (person.getEmail() == null) {
-            throw new NullPointerException("Email cannot be empty");
-        }
-        personService.save(person);
-        return ResponseEntity.ok().build();
     }
 
     /**

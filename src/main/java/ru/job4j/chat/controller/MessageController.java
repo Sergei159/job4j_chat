@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.chat.domain.Message;
+import ru.job4j.chat.domain.Room;
 import ru.job4j.chat.handlers.Operation;
 import ru.job4j.chat.service.MessageService;
 import ru.job4j.chat.service.RoomService;
@@ -95,14 +96,20 @@ public class MessageController {
     @PostMapping("/room/{id}")
     @Validated(Operation.OnCreate.class)
     public ResponseEntity save(@Valid @PathVariable int id, @Valid @RequestBody Message message) {
-        var room = roomService.findRoomById(id);
+        Optional<Room> room = roomService.findRoomById(id);
         if (room.isPresent()) {
             message.setRoom(room.get());
+            return new ResponseEntity<>(
+                    messageService.saveMessage(message),
+                    HttpStatus.CREATED
+            );
+        } else {
+            return new ResponseEntity<>(
+                    new Message(),
+                    HttpStatus.NOT_FOUND
+            );
         }
-        return new ResponseEntity<>(
-                messageService.saveMessage(message),
-                HttpStatus.CREATED
-        );
+
     }
 
     /**
@@ -111,11 +118,16 @@ public class MessageController {
     @PutMapping("/")
     @Validated(Operation.OnUpdate.class)
     public ResponseEntity<Void> update(@Valid @RequestBody Message message) {
-        if (message.getDescription() == null) {
-            throw new NullPointerException("Message cannot be empty");
+        Optional<Message> result = Optional.ofNullable(message);
+        if (result.isPresent()) {
+            if (message.getDescription() == null) {
+                throw new NullPointerException("Message cannot be empty");
+            }
+            this.messageService.saveMessage(message);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        this.messageService.saveMessage(message);
-        return ResponseEntity.ok().build();
     }
 
     /**

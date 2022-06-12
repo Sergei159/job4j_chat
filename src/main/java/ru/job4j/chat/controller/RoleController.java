@@ -36,7 +36,7 @@ public class RoleController {
     @GetMapping("/{id}")
     public ResponseEntity<Role> findRoleById(@Valid @PathVariable int id) {
         Optional<Role> role = roleService.findById(id);
-        return new ResponseEntity<Role>(
+        return new ResponseEntity<>(
                 role.orElse(new Role()),
                 role.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
         );
@@ -45,20 +45,28 @@ public class RoleController {
     @PostMapping("/")
     @Validated(Operation.OnCreate.class)
     public ResponseEntity<Role> save(@Valid @RequestBody Role role) {
-        return new ResponseEntity<Role>(
-                roleService.save(role),
-                HttpStatus.CREATED
+        Optional<Role> result = Optional.ofNullable(roleService.save(role));
+        return new ResponseEntity<>(
+                result.orElse(new Role()),
+                result.isPresent() ? HttpStatus.CREATED : HttpStatus.NOT_FOUND
         );
     }
 
     @PutMapping("/")
     @Validated(Operation.OnUpdate.class)
     public ResponseEntity<Void> update(@Valid @RequestBody Role role) {
-        if (role.getName() == null) {
-            throw new NullPointerException("Role name cannot be empty");
+        Optional<Role> result = Optional.ofNullable(role);
+        if (result.isPresent()) {
+            if (role.getName() == null) {
+                throw new NullPointerException("Role name cannot be empty");
+            }
+            this.roleService.save(role);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        this.roleService.save(role);
-        return ResponseEntity.ok().build();
+
+
     }
 
     @DeleteMapping("/{id}")

@@ -7,6 +7,7 @@ import ru.job4j.chat.domain.Person;
 import ru.job4j.chat.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -23,8 +24,13 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public void signUp(@RequestBody Person person) {
-        person.setPassword(encoder.encode(person.getPassword()));
-        users.save(person);
+        Optional<Person> result = Optional.ofNullable(person);
+        if (result.isPresent()) {
+            person.setPassword(encoder.encode(person.getPassword()));
+            users.save(person);
+        } else {
+            throw new IllegalArgumentException("Person in method signUp is null!!!");
+        }
     }
 
     @GetMapping("/all")
