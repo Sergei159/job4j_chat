@@ -37,4 +37,8 @@ public class PersonService implements Store {
     public Person patch(int id, Person person) throws InvocationTargetException, IllegalAccessException {
         return (Person) patch(repository, id, person);
     }
+
+    public Person findByName(String name) {
+        return repository.findByName(name);
+    }
 }

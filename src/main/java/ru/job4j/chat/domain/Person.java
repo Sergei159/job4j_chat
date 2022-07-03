@@ -11,8 +11,6 @@ import java.util.Objects;
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull(message = "Id must not be null",
-            groups = {Operation.OnUpdate.class, Operation.OnDelete.class})
     private int id;
 
     @Size(min = 2, message = "Name must have at least 2 symbols")
@@ -21,10 +19,10 @@ public class Person {
     @Email
     private String email;
 
-    @NotBlank(message = "Message body must contain symbols")
+    @NotBlank(message = "password must contain symbols")
     private String password;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "role_id")
     private Role role;
 

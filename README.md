@@ -1,11 +1,24 @@
 # job4j_chat
 
-Учебный проект чат, реализованный на REST API.
-Учебный проект чат, реализованный на REST API.
-Учебный проект чат, реализованный на REST API.
-Учебный проект чат, реализованный на REST API.
+REST API chat project
 
-Технологии:
-PostgreSQL
-Maven
+### Technologies
 Spring Boot
+Spring Data
+Spring Security
+PostgreSQL
+JWT
+
+### Functionality
+Registration
+![ScreenShot](images/1.JPG)
+Authorization
+![ScreenShot](images/2.JPG)
+Get all messages
+![ScreenShot](images/3.JPG)
+Send Message
+![ScreenShot](images/4.JPG)
+Get all rooms
+![ScreenShot](images/5.JPG)
+
+

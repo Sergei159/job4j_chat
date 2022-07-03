@@ -72,6 +72,9 @@ public class PersonController {
                 throw new IllegalArgumentException("Username can not be 'user'");
             }
             person.setPassword(encoder.encode(person.getPassword()));
+            if (person.getRole() == null) {
+                person.setRole(Role.of("default role"));
+            }
             personService.save(person);
             return new ResponseEntity<>(
                     result.get(),

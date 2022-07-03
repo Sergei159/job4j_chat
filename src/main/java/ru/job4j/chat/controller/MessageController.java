@@ -1,6 +1,5 @@
 package ru.job4j.chat.controller;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -10,13 +9,14 @@ import ru.job4j.chat.domain.Message;
 import ru.job4j.chat.domain.Room;
 import ru.job4j.chat.handlers.Operation;
 import ru.job4j.chat.service.MessageService;
+import ru.job4j.chat.service.PersonService;
 import ru.job4j.chat.service.RoomService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/message")
@@ -24,10 +24,12 @@ public class MessageController {
 
     private final MessageService messageService;
     private final RoomService roomService;
+    private final PersonService personService;
 
-    public MessageController(MessageService messageService, RoomService roomService) {
+    public MessageController(MessageService messageService, RoomService roomService, PersonService personService) {
         this.messageService = messageService;
         this.roomService = roomService;
+        this.personService = personService;
     }
     /**
      * Вывести все сообщения
@@ -95,15 +97,20 @@ public class MessageController {
      */
     @PostMapping("/room/{id}")
     @Validated(Operation.OnCreate.class)
-    public ResponseEntity save(@Valid @PathVariable int id, @Valid @RequestBody Message message) {
+    public ResponseEntity save(
+            @Valid @PathVariable int id,
+            @Valid @RequestBody Message message,
+            HttpServletRequest req) {
         Optional<Room> room = roomService.findRoomById(id);
+        String userName = req.getSession().getAttribute("userName").toString();
         if (room.isPresent()) {
+            message.setPerson(personService.findByName(userName));
             message.setRoom(room.get());
             return new ResponseEntity<>(
                     messageService.saveMessage(message),
                     HttpStatus.CREATED
             );
-        } else {
+        } else  {
             return new ResponseEntity<>(
                     new Message(),
                     HttpStatus.NOT_FOUND
